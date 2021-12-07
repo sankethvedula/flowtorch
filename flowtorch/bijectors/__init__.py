@@ -23,7 +23,7 @@ from flowtorch.bijectors.fixed import Fixed
 from flowtorch.bijectors.leaky_relu import LeakyReLU
 from flowtorch.bijectors.permute import Permute
 from flowtorch.bijectors.power import Power
-from flowtorch.bijectors.sigmoid import Sigmoid
+from flowtorch.bijectors.sigmoid import Sigmoid, InverseSigmoid
 from flowtorch.bijectors.softplus import Softplus
 from flowtorch.bijectors.spline import Spline
 from flowtorch.bijectors.spline_autoregressive import SplineAutoregressive
@@ -40,6 +40,7 @@ standard_bijectors = [
     ("Permute", Permute),
     ("Power", Power),
     ("Sigmoid", Sigmoid),
+    ("InverseSigmoid", InverseSigmoid),
     ("Softplus", Softplus),
     ("Spline", Spline),
     ("SplineAutoregressive", SplineAutoregressive),
