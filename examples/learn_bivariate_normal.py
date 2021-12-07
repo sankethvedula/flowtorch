@@ -8,6 +8,8 @@ import flowtorch.parameters as params
 import matplotlib.pyplot as plt
 import torch
 
+from flowtorch.bijectors import Compose
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 """
@@ -21,14 +23,17 @@ independent but not identical components (see the produced figures).
 
 def learn_bivariate_normal() -> None:
     # Lazily instantiated flow plus base and target distributions
-    bijectors = bij.AffineAutoregressive(
+    inverse_sigmoid = bij.InverseSigmoid()
+    affine_bijectors = bij.AffineAutoregressive(
         params=params.DenseAutoregressive(hidden_dims=(32,))
     )
+    bijectors = Compose([inverse_sigmoid, affine_bijectors])
     base_dist = torch.distributions.Independent(
-        torch.distributions.Normal(torch.zeros(2), torch.ones(2)), 1
+        torch.distributions.Uniform(torch.zeros(2), torch.ones(2)),
+        1,
     )
     target_dist = torch.distributions.Independent(
-        torch.distributions.Normal(torch.zeros(2) + 5, torch.ones(2) * 0.5), 1
+        torch.distributions.Normal(torch.zeros(2) + 3, torch.ones(2) * 1.5), 1
     )
 
     # Instantiate transformed distribution and parameters
@@ -116,6 +121,22 @@ def learn_bivariate_normal() -> None:
 
         loss.backward()
         opt.step()
+
+    base_samples = base_dist.sample(torch.Size([200]))
+    generated_samples = flow.bijector.forward(base_samples).detach()
+    _ = plt.figure(figsize=(7, 7))
+    plt.scatter(base_samples[:, 0], base_samples[:, 1], c="red")
+    plt.scatter(generated_samples[:, 0], generated_samples[:, 1], c="green")
+    for base_sample, generated_sample in zip(base_samples, generated_samples):
+        plt.plot(
+            [base_sample[0], generated_sample[0]],
+            [base_sample[1], generated_sample[1]],
+            linestyle="--",
+            color="blue",
+            linewidth=1,
+        )
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
